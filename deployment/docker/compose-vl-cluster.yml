@@ -2,18 +2,20 @@ services:
   # Grafana instance configured with VictoriaLogs as datasource
   grafana:
     image: grafana/grafana:11.5.0
+    user: 1000:1000
     depends_on:
       - "victoriametrics"
       - "vmauth"
     ports:
       - 3000:3000
     volumes:
-      - grafanadata:/var/lib/grafana
+      - ./grafana_data:/var/lib/grafana
       - ./provisioning/datasources/victoriametrics-logs-datasource/cluster.yml:/etc/grafana/provisioning/datasources/cluster.yml
       - ./provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./provisioning/plugins/:/var/lib/grafana/plugins
-      - ./../../dashboards/victoriametrics.json:/var/lib/grafana/dashboards/vm.json
-      - ./../../dashboards/victorialogs-cluster.json:/var/lib/grafana/dashboards/vl.json
+      - ./grafana_conf/grafana.ini:/etc/grafana/grafana.ini
+      # - ./provisioning/plugins/:/var/lib/grafana/plugins
+      # - ./../../dashboards/victoriametrics.json:/var/lib/grafana/dashboards/vm.json
+      # - ./../../dashboards/victorialogs-cluster.json:/var/lib/grafana/dashboards/vl.json
     environment:
       - "GF_INSTALL_PLUGINS=victoriametrics-logs-datasource"
     restart: always
@@ -33,6 +35,7 @@ services:
     depends_on: [vmauth]
     ports:
       - "8686:8686"
+      - "9000:9000"
     user: root
 
   vlinsert:
@@ -143,4 +146,4 @@ volumes:
   vmdata: {}
   vldata-1: {}
   vldata-2: {}
-  grafanadata: {}
+  # grafanadata: {}

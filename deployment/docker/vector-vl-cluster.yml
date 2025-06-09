@@ -10,16 +10,23 @@ sources:
     interval: 10
   vector_metrics:
     type: internal_metrics
+  firelens:
+    type: fluent
+    address: 0.0.0.0:9000
+    mode: tcp
 transforms:
   msg_parser:
     type: remap
-    inputs: [docker]
+    inputs: [docker, firelens]
+    # source: |
+    #   .message = parse_json(.message) ?? .message
     source: |
-      .message = parse_json(.message) ?? .message
+       log = parse_json!(.message)
+       . = parse_json!(log)
 sinks:
   elasticsearch:
     type: elasticsearch
-    inputs: [demo, msg_parser]
+    inputs: [msg_parser]
     endpoints: [http://vmauth:8427/insert/elasticsearch/]
     mode: bulk
     api_version: v8
